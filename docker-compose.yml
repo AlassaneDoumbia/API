@@ -1,0 +1,47 @@
+version: '3.3'
+services:
+  lba_partnership_api:
+    build: .
+    command: python /src/manage.py runserver 0.0.0.0:8088
+    container_name: api.lba.com
+    restart: always
+    volumes:
+      - .:/src
+    env_file:
+      - dgid_backend/.env
+    ports:
+      - "8088:8088"
+    depends_on:
+      - lba_partnership_db
+    networks:
+      - lba_partnership-network
+  lba_partnership_db:
+    restart: always
+    image: postgres:12.0-alpine
+    container_name: db.lba_partnership.com
+    ports:
+      - "5438:5438"
+    env_file:
+      - dgid_backend/.env
+    volumes:
+      - postgres_lba_partnership_data:/var/lib/postgresql/data/
+    networks:
+      - lba_partnership-network
+  lba_partnership_pgadmin:
+    restart: always
+    image: dpage/pgadmin4
+    container_name: pgadmin.lba_partnership.com
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "admin@lba.com"
+      PGADMIN_DEFAULT_PASSWORD: "@dmin123"
+    ports:
+      - "8089:8089"
+    depends_on:
+      - lba_partnership_db
+    networks:
+      - lba_partnership-network
+networks:
+  lba_partnership-network:
+    driver: bridge
+volumes:
+  postgres_lba_partnership_data: # Define seperate volume for Postgres data
